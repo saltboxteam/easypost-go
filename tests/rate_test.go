@@ -1,8 +1,12 @@
 package easypost_test
 
 import (
+	"encoding/json"
+	easypost2 "github.com/saltboxteam/easypost-go/v2"
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"strings"
+	"testing"
 
 	"github.com/EasyPost/easypost-go/v2"
 )
@@ -59,4 +63,62 @@ func (c *ClientTests) TestBetaStatelessRateGetLowestError() {
 	// Bad service
 	_, err = client.LowestStatelessRateWithCarrierAndService(rates, []string{"USPS"}, []string{"BadService"})
 	require.Error(err)
+}
+
+func TestSmartRateUpsDeliveryDateJson(t *testing.T) {
+	smartRateUpsDateJson := `
+{
+                "carrier": "UPS",
+                "carrier_account_id": "ca_a4be3a46b7bc4657ab2f6c898e1d7f6e",
+                "created_at": "2023-06-28T14:52:39Z",
+                "currency": "USD",
+                "delivery_date": "Thu, 29 Jun 2023 10:30:00 GMT",
+                "delivery_date_guaranteed": true,
+                "delivery_days": 1,
+                "est_delivery_days": 1,
+                "id": "rate_7f560e1598024218a94aad5eca72851e",
+                "list_currency": "USD",
+                "list_rate": 70.0,
+                "mode": "production",
+                "object": "Rate",
+                "rate": 45.57,
+                "retail_currency": "USD",
+                "retail_rate": 71.31,
+                "service": "NextDayAir",
+                "shipment_id": "shp_087a68cd07074e9da840971ced82cca5",
+                "updated_at": "2023-06-28T14:52:39Z"
+            }
+`
+
+	var smartRateUpsDate easypost2.SmartRate
+	err := json.Unmarshal([]byte(smartRateUpsDateJson), &smartRateUpsDate)
+	assert.NoError(t, err)
+
+	smartRateStandardDateJson := `
+{
+                "carrier": "UPS",
+                "carrier_account_id": "ca_a4be3a46b7bc4657ab2f6c898e1d7f6e",
+                "created_at": "2023-06-28T14:52:39Z",
+                "currency": "USD",
+                "delivery_date": "2023-06-28T14:52:39Z",
+                "delivery_date_guaranteed": true,
+                "delivery_days": 1,
+                "est_delivery_days": 1,
+                "id": "rate_7f560e1598024218a94aad5eca72851e",
+                "list_currency": "USD",
+                "list_rate": 70.0,
+                "mode": "production",
+                "object": "Rate",
+                "rate": 45.57,
+                "retail_currency": "USD",
+                "retail_rate": 71.31,
+                "service": "NextDayAir",
+                "shipment_id": "shp_087a68cd07074e9da840971ced82cca5",
+                "updated_at": "2023-06-28T14:52:39Z"
+            }
+`
+
+	var smartRateStandardDate easypost2.SmartRate
+	err = json.Unmarshal([]byte(smartRateStandardDateJson), &smartRateStandardDate)
+	assert.NoError(t, err)
 }

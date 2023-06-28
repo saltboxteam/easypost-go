@@ -30,29 +30,55 @@ type Rate struct {
 	CarbonOffset           *CarbonOffset `json:"carbon_offset,omitempty"`
 }
 
+type SmartRateDeliveryDate time.Time
+
+// Custom unmarshal function
+func (s *SmartRateDeliveryDate) UnmarshalJSON(b []byte) error {
+	if string(b) == "null" {
+		return nil
+	}
+
+	var t time.Time
+
+	// Try Thu, 29 Jun 2023 10:30:00 GMT format
+	t, err := time.Parse(`"Mon, 2 Jan 2006 15:04:05 MST"`, string(b))
+	if err == nil {
+		*s = SmartRateDeliveryDate(t)
+		return nil
+	}
+
+	err = t.UnmarshalJSON(b)
+	if err != nil {
+		return err
+	}
+
+	*s = SmartRateDeliveryDate(t)
+	return nil
+}
+
 // A SmartRate contains information on shipping cost and delivery time in addition to time-in-transit details.
 type SmartRate struct {
-	ID                     string         `json:"id,omitempty"`
-	Object                 string         `json:"object,omitempty"`
-	Mode                   string         `json:"mode,omitempty"`
-	CreatedAt              *time.Time     `json:"created_at,omitempty"`
-	UpdatedAt              *time.Time     `json:"updated_at,omitempty"`
-	Service                string         `json:"service,omitempty"`
-	Carrier                string         `json:"carrier,omitempty"`
-	CarrierAccountID       string         `json:"carrier_account_id,omitempty"`
-	ShipmentID             string         `json:"shipment_id,omitempty"`
-	Rate                   float64        `json:"rate,omitempty"`
-	Currency               string         `json:"currency,omitempty"`
-	RetailRate             float64        `json:"retail_rate,omitempty"`
-	RetailCurrency         string         `json:"retail_currency,omitempty"`
-	ListRate               float64        `json:"list_rate,omitempty"`
-	ListCurrency           string         `json:"list_currency,omitempty"`
-	DeliveryDays           int            `json:"delivery_days,omitempty"`
-	DeliveryDate           *time.Time     `json:"delivery_date,omitempty"`
-	DeliveryDateGuaranteed bool           `json:"delivery_date_guaranteed,omitempty"`
-	EstDeliveryDays        int            `json:"est_delivery_days,omitempty"`
-	TimeInTransit          *TimeInTransit `json:"time_in_transit,omitempty"`
-	BillingType            string         `json:"billing_type,omitempty"`
+	ID                     string                 `json:"id,omitempty"`
+	Object                 string                 `json:"object,omitempty"`
+	Mode                   string                 `json:"mode,omitempty"`
+	CreatedAt              *time.Time             `json:"created_at,omitempty"`
+	UpdatedAt              *time.Time             `json:"updated_at,omitempty"`
+	Service                string                 `json:"service,omitempty"`
+	Carrier                string                 `json:"carrier,omitempty"`
+	CarrierAccountID       string                 `json:"carrier_account_id,omitempty"`
+	ShipmentID             string                 `json:"shipment_id,omitempty"`
+	Rate                   float64                `json:"rate,omitempty"`
+	Currency               string                 `json:"currency,omitempty"`
+	RetailRate             float64                `json:"retail_rate,omitempty"`
+	RetailCurrency         string                 `json:"retail_currency,omitempty"`
+	ListRate               float64                `json:"list_rate,omitempty"`
+	ListCurrency           string                 `json:"list_currency,omitempty"`
+	DeliveryDays           int                    `json:"delivery_days,omitempty"`
+	DeliveryDate           *SmartRateDeliveryDate `json:"delivery_date,omitempty"`
+	DeliveryDateGuaranteed bool                   `json:"delivery_date_guaranteed,omitempty"`
+	EstDeliveryDays        int                    `json:"est_delivery_days,omitempty"`
+	TimeInTransit          *TimeInTransit         `json:"time_in_transit,omitempty"`
+	BillingType            string                 `json:"billing_type,omitempty"`
 }
 
 // A StatelessRate contains information on shipping cost and delivery time, but does not have an ID (is ephemeral).
